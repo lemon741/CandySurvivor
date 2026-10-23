@@ -121,6 +121,24 @@
     .epanel { width:min(420px,88vw); background:rgba(255,255,255,.95); border-radius:22px; padding:20px 18px; box-shadow:0 8px 22px rgba(0,0,0,.22); display:flex; flex-direction:column; align-items:center; gap:10px; }
     .epanel .btn { font-size:16px; padding:11px 30px; } .pv.big { width:96px; height:96px; border-radius:50%; border-width:4px; }
     .ep-t { font-weight:bold; color:#6b3a57; font-size:15px; } .ep-s { color:#a0607f; font-size:12px; line-height:1.6; }
+    /* --- キャンディサバイバー風 --- */
+    #expbar { position:absolute; top:env(safe-area-inset-top,0px); left:0; right:0; height:14px; background:rgba(70,30,80,.38); }
+    #expbar .bar-fill { display:block; height:100%; width:0; border-radius:0 8px 8px 0; background:linear-gradient(90deg,#8fe3ff,#4db8ff); box-shadow:0 0 8px rgba(77,184,255,.7); }
+    #expbar b { position:absolute; left:8px; top:0; font-size:10px; line-height:14px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6); }
+    .top-info, .top-btns, #boss-bar, #combo { margin-top:16px; }
+    #shop-list { max-height:58vh; }
+    .eb2 { display:flex; gap:6px; flex-direction:column; } .eb2 button { padding:6px 10px; }
+    .doll { width:min(420px,90vw); box-sizing:border-box; display:flex; align-items:center; justify-content:space-between; padding:14px; border-radius:22px;
+        background:radial-gradient(circle at 50% 35%,#ffe08a,#ff9a3d 75%); box-shadow:0 8px 20px rgba(0,0,0,.3), inset 0 0 0 2px rgba(255,255,255,.6); }
+    .doll .col { display:flex; flex-direction:column; gap:8px; } .hero { width:96px; height:96px; filter:drop-shadow(0 6px 4px rgba(0,0,0,.28)); }
+    .slot, .ecard { position:relative; border-radius:12px; border:2px solid rgba(255,255,255,.85); background:linear-gradient(160deg,#7a5a50,#4b3a40); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:10px; line-height:1.2; box-shadow:0 3px 0 rgba(0,0,0,.25); }
+    .slot { width:56px; height:56px; } .slot .si { font-size:24px; } .ecard .si { font-size:26px; } .ecard { aspect-ratio:1; } .ecard small { font-size:9px; }
+    .r0 { background:linear-gradient(160deg,#9db0c6,#667a92); } .r1 { background:linear-gradient(160deg,#c58cff,#7a35d8); } .r2 { background:linear-gradient(160deg,#ffd978,#ff9a1f); }
+    .egrid { width:min(420px,90vw); box-sizing:border-box; margin-top:10px; padding:10px; border-radius:18px; background:#2b2a4a; display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+    .ecard.off { opacity:.45; filter:grayscale(.6); } .ecard.sel { outline:3px solid #fff; outline-offset:1px; }
+    .edetail { width:min(420px,90vw); box-sizing:border-box; margin:10px 0; padding:12px 14px; border-radius:18px; background:rgba(255,255,255,.96); text-align:left; color:#6b3a57; }
+    .en { font-weight:bold; font-size:15px; } .es { font-size:12px; margin:4px 0; color:#a0607f; } .es.tr { color:#e0662a; font-weight:bold; }
+    .eb { display:flex; gap:8px; margin-top:8px; } .eb .btn { flex:1; padding:9px 8px; font-size:14px; letter-spacing:0; } .eb .btn:disabled { background:#d9cdd4; box-shadow:none; }
 </style>
 </head>
 <body>
@@ -140,19 +158,13 @@
     </div>
 
     <div id="hud">
-        <div id="prog"><i id="prog-fill"></i></div>
+        <div id="expbar"><i id="exp-fill" class="bar-fill"></i><b>Lv <span id="ui-lv">1</span></b></div>
         <div class="top-info">⏱ <span id="ui-time">0:00</span>　💀 <span id="ui-kills">0</span><br>⭐ <span id="ui-score">0</span></div>
         <div id="boss-bar"><div>👑 BOSS</div><div class="bar-bg"><div id="boss-fill" class="bar-fill"></div></div></div>
         <div id="combo"></div>
         <div class="top-btns">
             <div id="btn-sound" class="mini-btn pointer">🔊</div>
             <div id="btn-pause" class="mini-btn pointer">⏸</div>
-        </div>
-        <div class="bars">
-            <div class="bar-label">♥ HP <span id="ui-hp">100/100</span></div>
-            <div class="bar-bg"><div id="hp-fill" class="bar-fill"></div></div>
-            <div class="bar-label">★ LV <span id="ui-lv">1</span></div>
-            <div class="bar-bg"><div id="exp-fill" class="bar-fill"></div></div>
         </div>
         <div id="dash-btn" class="pointer">💨</div>
         <div id="toast"></div>
@@ -173,7 +185,7 @@
     <div id="gameover-screen" class="screen">
         <h2 id="go-title" class="title2" style="color:#ffb3d1">GAME OVER</h2>
         <div class="result" id="go-result"></div>
-        <button id="btn-retry" class="btn pointer">もう一度</button>
+        <button id="btn-retry" class="btn pointer">🏠 ホームにもどる</button>
         <button id="btn-go-shop" class="btn sub pointer">🛍 ショップへ</button>
     </div>
 
@@ -218,7 +230,7 @@ const PERKS = [
     { id: 'arm', icon: '🛡️', name: 'あめコーティング',   text: '被ダメージ -1',   max: 8,  base: 90 },
     { id: 'cdr', icon: '⏱️', name: 'はやがけレシピ',     text: '攻撃間隔 -4%',    max: 10, base: 80 },
     { id: 'dsh', icon: '🌀', name: 'ひらりダッシュ',     text: 'ダッシュCT -0.12秒', max: 8, base: 60 },
-    { id: 'cn',  icon: '🍬', name: 'キャンディ名人',     text: 'コイン +10%',     max: 10, base: 100 },
+    { id: 'cn',  icon: '🍬', name: 'キャンディ名人',     text: 'キャンディ +10%',     max: 10, base: 100 },
     { id: 'rev', icon: '👼', name: 'てんしのふっかつ',   text: '1回だけ復活',     max: 1,  base: 400 }
 ];
 const perks = {}; PERKS.forEach(p => perks[p.id] = loadNum('csPerk_' + p.id));
@@ -231,13 +243,13 @@ const CHARMS = [
     { id: 'c6', icon: '💍', name: 'じしゃくリング',     text: '吸引範囲 +80', cost: 500,  fx: s => s.magnet += 80 },
     { id: 'c4', icon: '🔮', name: 'すいしょうだま',     text: '経験値 +25%',  cost: 600,  fx: s => s.expMul += .25 },
     { id: 'c5', icon: '👑', name: 'おうかん',           text: 'ダメージ +15%', cost: 900, fx: s => s.power += .15 },
-    { id: 'c7', icon: '💎', name: 'ダイヤのリボン',     text: 'コイン +30%',  cost: 1200, fx: s => s.coinMul += .3 }
+    { id: 'c7', icon: '💎', name: 'ダイヤのリボン',     text: 'キャンディ +30%',  cost: 1200, fx: s => s.coinMul += .3 }
 ];
 const STAGES = [
     { icon: '🍭', name: 'キャンディランド', text: 'ふつう',                 hp: 1,   spd: 1,    sp: 1,    coin: 1,   tint: 0xffffff, cost: 0 },
-    { icon: '🌿', name: 'ミントの森',       text: '敵HP×1.3 / コイン×1.5', hp: 1.3, spd: 1.05, sp: 1.15, coin: 1.5, tint: 0xbfffd8, cost: 500 },
-    { icon: '🍫', name: 'チョコ洞窟',       text: '敵HP×1.7 / コイン×2',   hp: 1.7, spd: 1.1,  sp: 1.3,  coin: 2,   tint: 0xe0a98a, cost: 1500 },
-    { icon: '🌊', name: 'ソーダの海',       text: '敵HP×2.3 / コイン×3',   hp: 2.3, spd: 1.2,  sp: 1.5,  coin: 3,   tint: 0xa8d8ff, cost: 4000 }
+    { icon: '🌿', name: 'ミントの森',       text: '敵HP×1.3 / キャンディ×1.5', hp: 1.3, spd: 1.05, sp: 1.15, coin: 1.5, tint: 0xbfffd8, cost: 500 },
+    { icon: '🍫', name: 'チョコ洞窟',       text: '敵HP×1.7 / キャンディ×2',   hp: 1.7, spd: 1.1,  sp: 1.3,  coin: 2,   tint: 0xe0a98a, cost: 1500 },
+    { icon: '🌊', name: 'ソーダの海',       text: '敵HP×2.3 / キャンディ×3',   hp: 2.3, spd: 1.2,  sp: 1.5,  coin: 3,   tint: 0xa8d8ff, cost: 4000 }
 ];
 const SKINS = [
     { icon: '🧁', name: 'ノーマル',     cost: 0,    f: 0xff8fc7, f2: 0xffb3da, w: 0xffd27f, t: 0 },
@@ -251,13 +263,13 @@ const sel = { w: loadNum('csSelW'), c: loadNum('csSelC'), st: loadNum('csStage')
 const ST = () => STAGES[sel.st] || STAGES[0];
 const owned = id => loadNum('csO_' + id) === 1;
 let finalSpawned = false, shopTab = 0;
-let enemyData = '', enemyImg = null; const eBak = {};
-try { enemyData = localStorage.getItem('csEnemyImg') || ''; } catch (e) {}
-if (enemyData) { enemyImg = new Image(); enemyImg.src = enemyData; }
-function applyEnemyImg(img) {
-    ['gummy1', 'gummy2', 'gummy3', 'tank', 'runner', 'boss'].forEach(k => {
+const ETYPES = [['gummy', 'ふつうのグミ', ['gummy1', 'gummy2', 'gummy3']], ['runner', 'はしるグミ', ['runner']], ['tank', 'どっしりグミ', ['tank']], ['boss', 'ボス', ['boss']]];
+const eImg = {}, eBak = {};
+ETYPES.forEach(([id]) => { try { const d = localStorage.getItem('csEI_' + id); if (d) { eImg[id] = new Image(); eImg[id].src = d; } } catch (e) {} });
+function applyEnemyImg() {
+    ETYPES.forEach(([id, , keys]) => keys.forEach(k => {
         try {
-            const t = S.textures.get(k), c = t.getSourceImage(), x = c.getContext('2d'), w = c.width, h = c.height;
+            const t = S.textures.get(k), c = t.getSourceImage(), x = c.getContext('2d'), w = c.width, h = c.height, img = eImg[id];
             if (!eBak[k]) { eBak[k] = document.createElement('canvas'); eBak[k].width = w; eBak[k].height = h; eBak[k].getContext('2d').drawImage(c, 0, 0); }
             x.clearRect(0, 0, w, h);
             if (!img || !img.complete || !img.width) x.drawImage(eBak[k], 0, 0);
@@ -269,35 +281,79 @@ function applyEnemyImg(img) {
             }
             t.source[0].update();
         } catch (e) {}
-    });
-}
-function setEnemyImg(data) {
-    enemyData = data || '';
-    try { data ? localStorage.setItem('csEnemyImg', data) : localStorage.removeItem('csEnemyImg'); } catch (e) {}
-    if (data) { enemyImg = new Image(); enemyImg.onload = () => applyEnemyImg(enemyImg); enemyImg.src = data; }
-    else { enemyImg = null; applyEnemyImg(null); }
+    }));
 }
 function enemyPanel(list) {
-    const box = document.createElement('div'); box.className = 'epanel';
-    const mk = (tag, cls, txt) => { const d = document.createElement(tag); d.className = cls; if (txt) d.textContent = txt; box.appendChild(d); return d; };
-    const pv = mk('img', 'pv big'); pv.src = enemyData || S.textures.get('gummy1').getSourceImage().toDataURL();
-    mk('div', 'ep-t', 'てきを好きな画像にできます');
-    mk('div', 'ep-s', '顔写真・イラストなど、なんでもOK。画像はこの端末の中だけに保存されます。');
-    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.hidden = true; box.appendChild(inp);
-    const b1 = mk('button', 'btn', '🖼 画像をえらぶ'), b2 = mk('button', 'btn sub', 'もとにもどす');
-    b1.onclick = () => inp.click();
-    b2.onclick = () => { setEnemyImg(''); setTimeout(renderShop, 50); };
-    inp.onchange = () => {
-        const f = inp.files[0]; if (!f) return; const u = URL.createObjectURL(f), im = new Image();
-        im.onload = () => {
-            const c = document.createElement('canvas'); c.width = c.height = 96; const m = Math.min(im.width, im.height);
-            c.getContext('2d').drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, 96, 96);
-            URL.revokeObjectURL(u); setEnemyImg(c.toDataURL('image/jpeg', 0.85)); setTimeout(renderShop, 150);
+    ETYPES.forEach(([id, nm, keys]) => {
+        const r = document.createElement('div'); r.className = 'shop-row';
+        const el = (p, tag, cls, txt) => { const d = document.createElement(tag); if (cls) d.className = cls; if (txt) d.textContent = txt; p.appendChild(d); return d; };
+        const im = el(r, 'img', 'pv'); try { im.src = S.textures.get(keys[0]).getSourceImage().toDataURL(); } catch (e) {}
+        const tx = el(r, 'div', 'tx', nm); el(tx, 'small', '', eImg[id] ? 'オリジナル画像' : 'ノーマル');
+        const bx = el(r, 'div', 'eb2'), b1 = el(bx, 'button', '', 'えらぶ'), b2 = el(bx, 'button', '', 'もどす'); b2.disabled = !eImg[id];
+        const inp = el(r, 'input'); inp.type = 'file'; inp.accept = 'image/*'; inp.hidden = true;
+        b1.onclick = () => inp.click();
+        b2.onclick = () => { delete eImg[id]; try { localStorage.removeItem('csEI_' + id); } catch (e) {} applyEnemyImg(); renderShop(); };
+        inp.onchange = () => {
+            const f = inp.files[0]; if (!f) return; const u = URL.createObjectURL(f), a = new Image();
+            a.onload = () => {
+                const c = document.createElement('canvas'); c.width = c.height = 96; const m = Math.min(a.width, a.height);
+                c.getContext('2d').drawImage(a, (a.width - m) / 2, (a.height - m) / 2, m, m, 0, 0, 96, 96); URL.revokeObjectURL(u);
+                const d = c.toDataURL('image/jpeg', 0.85); try { localStorage.setItem('csEI_' + id, d); } catch (e) {}
+                const n = new Image(); n.onload = () => { eImg[id] = n; applyEnemyImg(); renderShop(); }; n.src = d;
+            };
+            a.src = u;
         };
-        im.src = u;
-    };
-    list.appendChild(box);
+        list.appendChild(r);
+    });
 }
+
+// ---- 装備 ----
+const SLOTS = ['ぶき', 'ぼうし', 'ふく', 'てぶくろ', 'くつ', 'おまもり'], RAR = ['N', 'R', 'S'], RCOST = [150, 600, 2000], LCOST = [60, 120, 260];
+const KL = { atk: 'ダメージ', hp: '最大HP', arm: '被ダメージ軽減', crit: '会心率', spd: '移動速度', mag: '吸引範囲', exp: '経験値', cn: 'キャンディ', cdr: '攻撃間隔短縮' };
+const EQ = [
+    [0,0,'🍬','キャンディガン','atk',.03], [0,1,'🍩','ドーナツランチャー','atk',.04,'sw','donut','はじめからドーナツを持つ'],
+    [0,1,'⚡','いなずまバー','atk',.04,'sw','laser','はじめからレーザーを持つ'], [0,2,'💣','ボムポップ','atk',.05,'sw','bomb','はじめからボムを持つ'],
+    [1,0,'🎀','リボン','hp',6], [1,1,'🍳','シェフハット','hp',9,'exp',.1,'経験値 +10%'], [1,2,'👑','キャンディクラウン','hp',13,'atk',.1,'ダメージ +10%'],
+    [2,0,'🧺','エプロン','arm',.4], [2,1,'🧥','クリームコート','arm',.6,'hp',20,'最大HP +20'], [2,2,'🛡️','キャラメルアーマー','arm',.8,'arm',2,'被ダメージ -2'],
+    [3,0,'🧤','ミトン','crit',.008], [3,1,'🥊','パティシエグローブ','crit',.01,'cdr',.05,'攻撃間隔 -5%'], [3,2,'💎','ダイヤグローブ','crit',.013,'crit',.1,'会心率 +10%'],
+    [4,0,'👟','スニーカー','spd',2], [4,1,'🥾','ミントブーツ','spd',3,'mag',40,'吸引範囲 +40'], [4,2,'🦄','ユニコーンシューズ','spd',4,'spd',20,'移動速度 +20'],
+    [5,0,'🍀','よつばのお守り','mag',6], [5,1,'🧸','くまさん','exp',.03,'hp',30,'最大HP +30'], [5,2,'🔮','すいしょうだま','exp',.04,'cn',.3,'キャンディ +30%']
+].map(([slot, r, ic, nm, k, v, tk, tv, tl], i) => ({ i, id: 'e' + i, slot, r, ic, nm, k, v, sw: tk === 'sw' ? tv : null, t: tk && tk !== 'sw' ? [tk, tv] : null, tl: tl || '' }));
+const elv = x => loadNum('csEL_' + x.id), eqOf = sl => EQ[loadNum('csEq' + sl) - 1];
+function addStat(s, k, v) {
+    if (k === 'atk') s.power += v; else if (k === 'hp') { s.maxHp += v; s.hp += v; } else if (k === 'arm') s.armor += v; else if (k === 'crit') s.crit += v;
+    else if (k === 'spd') s.speed += v; else if (k === 'mag') s.magnet += v; else if (k === 'exp') s.expMul += v; else if (k === 'cn') s.coinMul += v; else if (k === 'cdr') s.cdr *= 1 - v;
+}
+const fmtV = (k, v) => ['atk', 'crit', 'exp', 'cn', 'cdr'].includes(k) ? (v * 100).toFixed(1).replace(/\.0$/, '') + '%' : String(Math.round(v * 10) / 10);
+let eqSelI = 0;
+function equipPanel(list) {
+    const el = (p, tag, cls, txt) => { const d = document.createElement(tag); if (cls) d.className = cls; if (txt != null) d.textContent = txt; p.appendChild(d); return d; };
+    const rr = () => { renderShop(); refreshChip(); }, it = EQ[eqSelI], lv = elv(it), on = eqOf(it.slot) === it;
+    const doll = el(list, 'div', 'doll'), L = el(doll, 'div', 'col'), hero = el(doll, 'img', 'hero'), R = el(doll, 'div', 'col');
+    try { hero.src = S.textures.get('p' + sel.k).getSourceImage().toDataURL(); } catch (e) {}
+    SLOTS.forEach((nm, sl) => {
+        const q = eqOf(sl), d = el(sl < 3 ? L : R, 'div', 'slot' + (q ? ' r' + q.r : ''));
+        el(d, 'span', 'si', q ? q.ic : '＋'); el(d, 'small', '', q ? 'Lv' + elv(q) : nm);
+        d.onclick = () => { eqSelI = q ? q.i : EQ.findIndex(x => x.slot === sl); rr(); };
+    });
+    const g = el(list, 'div', 'egrid');
+    EQ.forEach(x => {
+        const l = elv(x), c = el(g, 'div', 'ecard r' + x.r + (l ? '' : ' off') + (x.i === eqSelI ? ' sel' : ''));
+        el(c, 'span', 'si', x.ic); el(c, 'small', '', l ? 'Lv' + l : '🔒'); c.onclick = () => { eqSelI = x.i; rr(); };
+    });
+    const d = el(list, 'div', 'edetail');
+    el(d, 'div', 'en', `${x_(it)}`); el(d, 'div', 'es', `${SLOTS[it.slot]}　${KL[it.k]} +${fmtV(it.k, it.v * Math.max(1, lv))}${lv ? '' : '（Lv1）'}`);
+    if (it.t || it.sw) el(d, 'div', 'es tr', '★特性：' + it.tl);
+    const bx = el(d, 'div', 'eb'), act = (txt, off, fn) => { const b = el(bx, 'button', 'btn', txt); b.disabled = off; b.onclick = () => { fn(); Sound.init(); Sound.gem(); rr(); }; };
+    const pay = c => { if (coins < c) return false; coins -= c; saveNum('csCoins', coins); setText('coins-start', coins); return true; };
+    if (!lv) act(`🍬 ${RCOST[it.r]}で入手`, coins < RCOST[it.r], () => { if (pay(RCOST[it.r])) saveNum('csEL_' + it.id, 1); });
+    else {
+        const c = Math.round(LCOST[it.r] * lv * (1 + lv * 0.2));
+        act(lv >= 10 ? 'MAX' : `強化 🍬 ${c}`, lv >= 10 || coins < c, () => { if (pay(c)) saveNum('csEL_' + it.id, lv + 1); });
+        act(on ? 'はずす' : 'そうび', false, () => saveNum('csEq' + it.slot, on ? 0 : it.i + 1));
+    }
+}
+const x_ = x => `【${RAR[x.r]}】${x.ic} ${x.nm}${elv(x) ? '　Lv.' + elv(x) : ''}`;
 function rainbow(h) { const f = n => { const k = (n + h * 6) % 6; return Math.round(255 * (1 - .45 * Math.max(0, Math.min(k, 4 - k, 1)))); }; return (f(5) << 16) | (f(3) << 8) | f(1); }
 function refreshChip() { $('stage-chip').textContent = ST().icon + ' ' + ST().name + '　' + (SKINS[sel.k] || SKINS[0]).icon; }
 let combo = 0, comboUntil = 0, bossRef = null, revived = false, txtCount = 0;
@@ -467,7 +523,11 @@ window.onload = function () {
     if (matchMedia('(pointer:coarse)').matches) $('help-txt').innerHTML = '画面をドラッグで移動（触れた所がスティック）<br>💨ボタンでダッシュ（無敵）　⏸でポーズ<br>攻撃は自動！ たおして キャンディを あつめよう';
 
     $('btn-start').onclick = startGame;
-    $('btn-retry').onclick = startGame;
+    $('btn-retry').onclick = goHome;
+    function goHome() {
+        ['gameover-screen', 'pause-screen', 'levelup-modal', 'hud'].forEach(k => { const e = $(k); if (e) e.style.display = 'none'; });
+        $('start-screen').style.display = 'flex'; setText('coins-start', coins); setText('best-start', best); refreshChip();
+    }
     $('btn-shop').onclick = $('btn-go-shop').onclick = openShop;
     $('btn-shop-close').onclick = closeShop;
     setText('coins-start', coins);
@@ -517,9 +577,8 @@ function resetGame() {
     donutSprites.forEach(d => d.destroy()); donutSprites = [];
     fx.forEach(f => f.obj && f.obj.destroy()); fx.length = 0; txtCount = 0;
     combo = 0; comboUntil = 0; bossRef = null; revived = false;
-    stats = newStats(); weapons = newWeapons(); dash = newDash(); finalSpawned = false; applyEnemyImg(enemyImg);
-    const sw = WEAPS[sel.w] ? WEAPS[sel.w][0] : 'candy'; if (sw !== 'candy') weapons[sw].lv = 1;
-    const ch = CHARMS[sel.c - 1]; if (ch) ch.fx(stats);
+    stats = newStats(); weapons = newWeapons(); dash = newDash(); finalSpawned = false; applyEnemyImg();
+    EQ.forEach(x => { if (eqOf(x.slot) === x) { addStat(stats, x.k, x.v * elv(x)); if (x.t) addStat(stats, x.t[0], x.t[1]); if (x.sw) weapons[x.sw].lv = 1; } });
     bgTile.setTexture('bg' + sel.st); player.setTexture('p' + sel.k);
     gameTime = 0; lastSpawn = 0; nextBossAt = 60000; bossCount = 0; score = 0; invulUntil = 0;
     Object.assign(joy, { active: false, id: null, x: 0, y: 0 });
@@ -699,7 +758,7 @@ function create() {
 function update(time, delta) {
     if (state !== 'playing') return;
     delta = Math.min(delta, 50);
-    gameTime += delta;
+    gameTime += delta; drawHpBar();
     if (!finalSpawned && gameTime >= 900000) { finalSpawned = true; spawnBoss(true); }
     const dt = delta / 1000;
     const sec = gameTime / 1000;
@@ -1101,7 +1160,7 @@ function gameOver(mode) {
     const earned = Math.floor(total / 8 * ST().coin * stats.coinMul);
     coins += earned; saveNum('csCoins', coins); setText('coins-start', coins);
     $('go-result').innerHTML = '';
-    [`SCORE: ${total}${isNew ? '  🎉 NEW RECORD!' : ''}`, `生存時間: ${fmtTime(gameTime)}`, `撃破数: ${stats.kills}　到達Lv: ${stats.lv}`, `BEST: ${best}`, `🍬 +${earned} コイン獲得！`]
+    [`SCORE: ${total}${isNew ? '  🎉 NEW RECORD!' : ''}`, `生存時間: ${fmtTime(gameTime)}`, `撃破数: ${stats.kills}　到達Lv: ${stats.lv}`, `BEST: ${best}`, `🍬 +${earned} キャンディ獲得！`]
         .forEach(t => { const d = document.createElement('div'); d.textContent = t; $('go-result').appendChild(d); });
     $('hud').style.display = 'none';
     $('go-title').textContent = mode === 'win' ? '🎉 STAGE CLEAR!' : mode === 'retire' ? 'RETIRE' : 'GAME OVER';
@@ -1146,18 +1205,8 @@ function renderShop() {
             coins -= cost; perks[p.id]++; saveNum('csCoins', coins); saveNum('csPerk_' + p.id, perks[p.id]); setText('coins-start', coins);
         });
     });
-    else if (shopTab === 1) {
-        WEAPS.forEach(([id, ic, nm, cost], k) => {
-            const has = !cost || owned('w' + id), eq = sel.w === k;
-            row(ic, '初期武器：' + nm, eq ? 'そうび中' : 'ゲーム開始時から持てる', eq ? 'そうび中' : has ? 'そうび' : `🍬 ${cost}`, eq || (!has && coins < cost),
-                () => { if (!has && !buy('w' + id, cost)) return; sel.w = k; saveNum('csSelW', k); });
-        });
-        CHARMS.forEach((c, k) => {
-            const has = owned(c.id), eq = sel.c === k + 1;
-            row(c.icon, c.name, c.text, eq ? 'はずす' : has ? 'そうび' : `🍬 ${c.cost}`, !eq && !has && coins < c.cost,
-                () => { if (eq) sel.c = 0; else { if (!has && !buy(c.id, c.cost)) return; sel.c = k + 1; } saveNum('csSelC', sel.c); });
-        });
-    } else if (shopTab === 2) STAGES.forEach((t, k) => {
+    else if (shopTab === 1) equipPanel(list);
+    else if (shopTab === 2) STAGES.forEach((t, k) => {
         const has = !t.cost || owned('s' + k), eq = sel.st === k;
         row(tex('bg' + k, t.icon), t.name, t.text, eq ? 'えらび中' : has ? 'えらぶ' : `🍬 ${t.cost}`, eq || (!has && coins < t.cost),
             () => { if (!has && !buy('s' + k, t.cost)) return; sel.st = k; saveNum('csStage', k); });
@@ -1179,17 +1228,19 @@ function fmtTime(ms) {
 }
 
 function updateHud() {
-    const hp = Math.max(0, Math.ceil(stats.hp));
-    setText('ui-hp', `${hp}/${stats.maxHp}`);
     setText('ui-lv', stats.lv);
-    setText('ui-time', fmtTime(gameTime) + ' / 15:00');
-    const pg = Math.min(100, gameTime / 9000).toFixed(1) + '%'; if (cache.pg !== pg) { cache.pg = pg; $('prog-fill').style.width = pg; }
+    setText('ui-time', fmtTime(gameTime));
     setText('ui-kills', stats.kills);
     setText('ui-score', score);
-    const hpW = (hp / stats.maxHp * 100).toFixed(1) + '%';
     const exW = Math.min(100, stats.exp / stats.next * 100).toFixed(1) + '%';
-    if (cache.hpw !== hpW) { cache.hpw = hpW; $('hp-fill').style.width = hpW; }
     if (cache.exw !== exW) { cache.exw = exW; $('exp-fill').style.width = exW; }
+}
+let hpG;
+function drawHpBar() {
+    if (!hpG) hpG = S.add.graphics().setDepth(30);
+    const w = 40, x = player.x - w / 2, y = player.y + 28, p = Math.max(0, Math.min(1, stats.hp / stats.maxHp));
+    hpG.clear(); hpG.fillStyle(0x000000, 0.35); hpG.fillRoundedRect(x - 1, y - 1, w + 2, 8, 4);
+    hpG.fillStyle(p > 0.3 ? 0xff5fa2 : 0xff3355, 1); hpG.fillRoundedRect(x, y, Math.max(2, w * p), 6, 3);
 }
 
 let toastTimer = null;
